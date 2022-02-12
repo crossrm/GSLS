@@ -1,0 +1,306 @@
+---
+title:  "Replicate results from: Removing Collinearity while Preserving Interpretability"
+author: "Robin Cross"
+date:   "2.4.2022"
+output: "Results tables csv"
+---
+
+TEST CODE RENAME
+```{r}
+
+
+DF1 <- data.frame(a=1:3, b=4:6)
+DF2 <- data.frame(c=-2:0, d=3:1)
+
+DF1 
+DF2
+
+DF5 <- cbind("asdf"=DF1[,1])
+DF5
+
+DF4 <- cbind(DF1[,1])
+DF4 
+
+
+# create three vectors with integer and string types
+vector1 = c(1,2,3,4,5)
+  
+vector2 = c("sravan","bobby","ojsawi",
+            "gnanesh","rohith")
+  
+vector3 = c(12,34,21,34,51)
+  
+# display
+print(vector1)
+print(vector2)
+print(vector3)
+  
+# combine three vectors with in  cbind() function
+combined = cbind("ID"=vector1,
+                 "NAME"=vector2,"AGE"=vector3)
+  
+# display
+combined
+
+combined2 = cbind(combined[,1:2])
+combined2
+
+combined3 = cbind(combined[,1])
+combined3
+
+combined5 = cbind(combined3, combined3, combined4)
+combined5
+
+
+
+
+library(dplyr)
+head(mtcars) %>% rename(!!paste0('HO_', 2) := mpg, 'MI' = carb)
+
+for(i in 1:2) {head(mtcars) %>% rename(!!paste0('HO_', i) := mpg, 'MI' = carb)}
+
+
+ df <- data.frame(x=c(12,14,56,34,45,45))
+ rownames(df) <- c("AndyBullxxx", "AlexPullxcx","AndyPamxvb", "RickRalldfg","AndyPantert","SamSaltedf")
+ ## see what grep does
+ grep("^Andy",rownames(df))
+ head(df)
+ 
+ 
+ for(i in 1:6) { #-- Create objects  'r.1', 'r.2', ... 'r.6' --
+    nam <- paste("r", i, sep = ".")
+    assign(nam, 1:i)
+ }
+ for(i in 1:6) { #-- Create objects  'r.1', 'r.2', ... 'r.6' --
+    assign(paste("d", i, sep = "."), (1:i))
+}
+ls(pattern = "^d..$")
+
+
+
+
+library(tidyverse)
+library(dplyr)
+
+rm(list = ls())
+
+df <- structure(list(Sepal.Length = c(5.1, 4.9, 4.7, 4.6, 5), Sepal.Width = c(3.5, 
+3, 3.2, 3.1, 3.6), Petal.Length = c(1.4, 1.4, 1.3, 1.5, 1.4)), .Names = c("Sepal.Length", 
+"Sepal.Width", "Petal.Length"), row.names = c(NA, 5L), class = c("tbl_df", 
+"tbl", "data.frame"))
+#head(df)
+
+cols = c("Sepal.Length", "Petal.Length")
+to_app = ".xxx"
+df <- rename_with(df, .fn = ~paste0(., to_app), .cols = all_of(cols) )
+df <- rename_at(df, vars( contains("Length") ), list( ~paste0(., ".xxx") ) )
+head(df)
+
+
+run_data %>% summarize_at(vars(), funs(mean, sd))
+#stats <- summarize_at(vars(run_data[vars()], funs(sd))
+stats <- summarise_at(run_data, vars(year2_sim0), funs(sd))
+stats <- summarise_at(run_data, vars(co), funs(sd))
+stats
+
+
+
+
+```
+
+TEST CODE LAPLACE
+```{r}
+
+ df <- data.frame(x=c(12,14,56,34,45,45))
+ rownames(df) <- c("AndyBullxxx", "AlexPullxcx","AndyPamxvb", "RickRalldfg","AndyPantert","SamSaltedf")
+ ## see what grep does
+ grep("^Andy",rownames(df))
+
+ indvars <- data.frame{}
+
+## You can combine the sep and collapse arguments together.
+paste(1:12, nth, sep = ": ", collapse = "; ")
+paste0(nth, collapse = ", ")
+simlist <- c("_sim", "_seq")
+simlist
+
+varlist1 <- paste0(simlist, 1:4)
+varlist2 <- paste0(simlist, 1:4)
+varlist <- c(varlist1, varlist2)
+varlist
+
+
+# This is it
+count <- endblock - startblock
+doublecount <- count * 2 
+
+varlist <- ceiling(seq(1, doublecount) /2)
+varlist
+
+
+varlist2 <- varlist1
+varlist <- Map(c, varlist1, varlist2)
+varlist
+
+varlist[,order(colnames(varlist))]
+
+varlist <- varlist[order(varlist)]
+varlist
+
+varlist <- append(varlist1, varlist2)
+varlist
+varlist1
+
+
+varlist3 <- paste0(simlist, startblock:endblock)
+varlist3
+
+list1 <- list(1:4)
+list2 <- list(1:4)
+combineListsAsOne <-function(list1, list2){
+  n <- c()
+  for(x in list1){
+    n<-c(n, x)
+  }
+  for(y in list2){
+    n<-c(n, y)
+  }
+  return(n)
+}
+combineListsAsOne
+varlist4 <- combineListsAsOne
+varlist4
+
+
+```
+
+
+
+ARCHIVE CODE
+```{r}
+
+archive_flag <- ""
+
+if (archive_flag) {
+  
+  
+# Try paste and assigning
+cols = c("mage", "mom_grade", "momtest")
+run_data <- rename_with(run_data, .fn = ~paste0(., "_seq2"), .cols = all_of(cols) )
+
+#for(i in 2:15) {run_data <- rename(run_data[i], paste("year",i,"_sim0) = (i))}
+for(i in 2:15) {
+  
+  nam <- assign(paste("year", i, sep = "~"), run_data[i]) 
+
+}
+decor_data <- cbind("cpuid"=run_data[,1])
+# RENAME to assign blocks (new data frame called decor_data)
+for(i in 2:15) { 
+  
+  decor_data[,i] <- assign(paste("year", i, sep = "~"), run_data[,i]) 
+  
+  #decor_data <- cbind(decor_data, nam)
+  
+  }
+head(decor_data, 3)
+head(nam, 3)
+
+for(i in 2:15) { assign(paste("year", i, sep = "."), run_data[,i]) }
+
+
+head(year___10, 5)
+
+
+for(i in 2:15) { nam <- paste("A", i, sep = ".") assign(nam, run_data[i]) }
+
+for(i in 2:15) {       # for-loop over rows 
+  
+  decor_data.paste("year",i,"_sim0") <- run_data[, i] 
+}
+
+for(i in 2:15) {decor_data <- rename(run_data[i], paste("year",i,"_sim0"))}
+
+
+head(decor_data, 3)
+
+install.packages(MuMIn)
+library(MuMIn)
+require(mgcv)
+ms1 <- dredge(  lm(run_data$momrace1_sim1 ~ ., data=run_data))
+	
+fm2 <- gam(Prop ~ s(dose, k = 3), data = Beetle, family = binomial)
+
+merge(ms1, model.sel(fm2))
+
+int_list[k] <- assign(paste("M", k, sep = "~"), lm(run_data$momrace1_sim1 ~ ., data=run_data)) 
+    #int_list[k] <- lm(run_data$momrace1_sim1 ~ ., data=run_data) 
+    #int_list[k] <- paste("M", k, sep = "~")
+    
+    asdf
+    
+    int_list$nam = paste("M", k, sep = "")
+    lm(run_data$momrace1_sim1 ~ ., data=run_data)
+    int_list
+    
+    
+    # Try 18
+    rm(list = ls())
+
+    datalist = list()
+
+    for (i in 1:5) {
+        # ... make some data
+        dat <- data.frame(x = rnorm(10), y = runif(10))
+       # dat$i <- i  # maybe you want to keep track of which iteration produced it?
+        datalist[[i]] <- dat # add it to your list
+    }
+    
+    big_data = do.call(rbind, datalist)
+    # or big_data <- dplyr::bind_rows(datalist)
+    # or big_data <- data.table::rbindlist(datalist)
+
+    # Pretty close
+    # Add block (or variable) to decor_data
+  decor_data <- cbind(decor_data, select_at(run_data, vars(ends_with("_sim1"))))
+  
+  #Print
+  #head(decor_data,3)
+  
+  # Run2
+  int_list$model2=lm(run_data$mom_grade_seq2 ~ ., data=decor_data)
+  #summary(int_list$model2)
+  
+  
+  
+  # Round 0 (end of loop 0:4?)
+  simvar <- c("_sim0")
+  decor_data <- append(decor_data, select_at(run_data, vars(ends_with(simvar))))
+
+  
+  # Advance count variable and end
+  #k <- k + 1
+
+
+  mydata <- mtcars
+	# summarise all the list of numeric variable of dataframe
+	stat<- summarise_if(mydata, is.numeric, funs(n(),mean,median))
+	stat <- summarise_at(mydata, vars(contains("mpg")), funs(n()))
+	print(stat)
+	if (!is.null(stat)) {print("not null!")}
+	
+#ARCHIVE
+# BLOCK
+#varlist <- list("year2", "year3", "year4", "year5", "year6", "year7", "year8", "year9", "year10", "year11", "year12", "year13", "year14", "year15")
+#for(i in varlist) {print(i)}
+
+# Try paste and assigning
+#for(i in 2:15) {run_data <- rename(run_data[i], paste("year",i,"_sim0) = (i))}
+
+# run_data <- rename(run_data, year2_sim0 = year2)
+
+  
+  
+}
+
+```

@@ -1,0 +1,263 @@
+---
+title:  "Replicate results from: Removing Collinearity while Preserving Interpretability"
+author: "Robin Cross"
+date:   "2.4.2022"
+output: "Results tables csv"
+---
+
+Packages and libraries
+```{r}
+
+#Install if it's your first run
+first_run <- 0
+if (first_run) {
+  
+  # Clear Global Environment
+  rm(list = ls())
+  
+  # Installation
+  #install.packages("vtable")
+  #install.packages("gtsummary")
+  install.packages("stargazer")  
+  install.packages("tidyverse")
+  install.packages("dplyr")
+
+  
+    
+} #End if first_run
+
+# Libraries 
+  #library(gtsummary)
+  #library(vtable)
+  library(stargazer)
+  library(tidyverse)
+  library(dplyr)
+
+```
+
+
+Load data
+```{r}
+# Clear Global Environment
+rm(list = ls())
+
+#Load Data
+run_data            <- read.delim('C:/data/laplace/R/Laplace_NLSY_data.csv')
+#head(run_data, 5)
+
+```
+
+User preferences
+```{r}
+
+# Set covaraiate retention threshold
+# Drops covariates explained (R^2) greater than stated tolerance
+# Set to 1.0 for no drops, 0.99 to drop when R^2 greater than 0.99
+collin_tolerance		<- 0.99	
+
+# Set results table print choice
+# Table 2 - (save_intermediate=0) Results table compares OLS direct effects to Laplace total effects
+# Table 3 - (save_intermediate=1) Intermediate regression results (all) - too large for some screen display
+save_intermediate   <- 1
+
+```
+
+Order data, assign blocks
+```{r}
+
+# SAVE participant identifier data frame for later join with decor data and drop
+identifiers <- select_at(run_data, vars("cpubid", "momid"))
+run_data <- select(run_data, -ends_with("id"))
+
+# ORDER
+col_order <- c("year2", "year3", "year4", "year5", "year6", "year7", "year8", "year9", "year10", "year11", "year12", "year13", "year14", "year15", "momrace1", "momrace2", "mage", "mom_grade", "momtest", "spouse_yn", "spouse_age", "spouse_grade", "csex2", "childage", "family_size", "fincome", "test_pcntl")
+run_data <- run_data[, col_order]
+
+# Create decor_data (to designate block names and run model)
+# Group 0 - fixed effects
+run_data <- rename_at(run_data, vars( contains("year") ), list( ~paste0(., "_sim0") ) )
+
+# Group 1 - race effects
+run_data <- rename_at(run_data, vars( contains("momrace") ), list( ~paste0(., "_sim1") ) )
+
+# Group2 - mother characteristics
+run_data <- rename_at(run_data, vars( mage:momtest), list( ~paste0(., "_seq2") ) )
+
+# Group 3 - spousal characteristics
+run_data <- rename_at(run_data, vars( contains("spouse_") ), list( ~paste0(., "_sim3") ) )
+
+# Group4 - remaining covariates
+run_data <- rename_at(run_data, vars( csex2:fincome), list( ~paste0(., "_seq4") ) )
+
+# Indicate initial and terminal block numbers, e.g., _sim0-_seq4 => startblock<-0, endblock<-4
+startblock <- 0
+endblock <- 4
+
+
+```
+
+
+Run Ext. Laplace and print table 1 (OLS vs Ext. Laplace) or table 3 (intermediate regressions)
+```{r}
+
+# Get column names for matrix conversion
+#c_list <- colnames(select_at(run_data, vars(contains(""))))
+
+# Center - all variables - creates a matrix
+run_data <- sapply(run_data, function(x) scale(x, scale=FALSE))
+#summary(run_data)
+
+# Convert back to data frame
+run_data <- as.data.frame(run_data)
+#head(run_data, 3)
+
+# Generate two blank lists (to hold compare and intermediate results)
+int_list <- list()
+comp_list <- list()
+
+# Generate loop list
+doublecount <- (endblock - startblock) * 2
+nlist <- floor(seq(startblock, doublecount + 1) /2)
+simlist <- c("_sim", "_seq")
+nlist <- paste0(simlist, nlist)
+rm(simlist, doublecount)
+
+# Initial comp model - OLS direct effects
+indvars <- select_at(run_data, vars(contains("_s")))
+comp_list$model1=lm(run_data$test_pcntl ~ ., data=indvars)
+rm(indvars)
+
+# Gen empty decor_data data frame for orthogonalized covariates
+decor_data <- data.frame()
+
+# Initiate block and covariate counter variable
+b <- 1
+k <- 1
+
+# Ext. Laplace loop
+for (i in nlist) {
+  
+  ## List covariates in block
+  c_list <- colnames(select_at(run_data, vars(contains(i))))
+  c_group <- data.frame(select_at(run_data, vars(contains(i))))
+    print(c_list)
+  
+  # Set group counters
+  g <- 1
+  G <- ncol(c_group)
+
+  # Covariate block loop
+  for (g in 1:G) {
+
+    # Set try catch flag
+    skip_to_next <- FALSE
+    
+    # Run OLS - if valid, continue, if invalid, move to next covariate
+    tryCatch( model <- lm(c_group[,g] ~ ., data=decor_data), error = function(e) { skip_to_next <<- TRUE}) #change to decor_data
+    if(skip_to_next) { next } #End if skip
+    
+    # Check R^2 and drop model if above threshold
+    r2 <- summary(model)$r.squared
+
+    if(r2 > collin_tolerance) { 
+
+      # Drop covariate and move to next covariate
+      c_group = subset(c_group, select=-c(g))
+      
+      next 
+      
+      } #End if r2
+    
+    # Add model to results list and proceed
+    int_list[[k]] <- model
+    
+    # Predict
+    yhat <- predict(model, newdata = decor_data) #change to decor_data
+    
+    # Replace in c_group
+    c_group[[g]] <- yhat -  c_group[[g]]
+    # If sequential - add replacement to decor_data 
+    target <- "_seq"
+    if(grepl(target, i, fixed = TRUE)) {
+      
+      # Retrieve current variable 
+      s_element <- c_list[g]
+      # Append variable into data
+      decor_data <- append(decor_data, select_at(c_group, vars(contains(s_element))))
+      
+    } #End if sequential
+    
+    # Advance covariate counter
+    k <- k + 1
+    
+  } #End loop over block
+
+  # If block is simultaneous - add to decor_data 
+  target <- "_sim"
+  if(grepl(target, i, fixed = TRUE)) {
+    
+    # Populate decor_data if first block, add to it if a later block 
+    if (b == 1) {
+  
+      # Populate
+      decor_data <- c_group
+    
+      } else {
+      
+      # Add block 
+      decor_data <- cbind(decor_data, c_group)
+      
+      asdf
+      
+      } #End counter else
+    
+    } #End if simultaneous
+  
+  # Advance block counter
+  b <- b + 1
+
+  } #End Laplace loop
+
+# Terminal comp model - Laplace total effects
+model <- lm(run_data$test_pcntl ~ ., data=decor_data)
+int_list[[k]] <- model
+comp_list[[2]] <- model
+#summary(int_list)
+
+
+```
+PRINT TABLES AND SAVE DATA
+```{r}
+
+# Generate tables
+IntResultsTable=stargazer(int_list,title="Intermediate Results",type='text',no.space=TRUE,omit.stat=c("LL","aic","f","wald","adj.rsq", "ser","n"),model.names = FALSE, report="vc*")
+
+CompResultsTable=stargazer(comp_list,title="Comparison Results",type='text',no.space=TRUE,omit.stat=c("LL","aic","f","wald","adj.rsq", "ser","n"),model.names = FALSE, column.labels=c("OLS (DE)","Ext. Laplace (TE)"), report="vc*")
+
+# Save tables
+openxlsx::write.xlsx(IntResultsTable,file= "Intermediate Ext Laplace Results.xlsx")
+openxlsx::write.xlsx(ResultsTable,file= "Comparison Ext Laplace Results.xlsx")
+
+# Add identifiers and depvar to decor_data
+decor_data <- cbind(decor_data, run_data$test_pcntl)
+decor_data <- cbind(decor_data, identifiers)
+rm(identifiers)
+
+# Clean up environment
+rm(c_group, model, c_list, col_order, g, G, i, b, nlist, r2, skip_to_next, yhat)
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+

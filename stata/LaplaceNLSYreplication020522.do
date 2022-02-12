@@ -59,7 +59,7 @@ if prep == 1 {
 	if set == 1 {
 		
 		clear all
-		local myfolder = "C:\data\NLSY\" //Set your default drive here
+		local myfolder = "C:\data\laplace\stata\" //Set your default drive here
 		cd `mydrive'
 		clear matrix
 		set matsize 11000, permanently
@@ -630,7 +630,7 @@ if prep == 1 {
 		
 		** Output csv file
 		cd `myfolder'
-		outsheet using Laplace_run_data_NLSY.csv, replace
+		outsheet using Laplace_NLSY_data.csv, replace
 		
 	} //End if 
 	di "Done with data prep."
@@ -657,7 +657,7 @@ if decor == 1 {
 	** Set results table print choice
 	** Table 2 - (save_intermediate=0) Results table compares OLS direct effects to Laplace total effects
 	** Table 3 - (save_intermediate=1) Intermediate regression results (all) - too large for some screen display
-	local save_intermediate 	= 1
+	local save_intermediate 	= 0
   	
 	** Order data 	// Order chronologically, group simultaneous variables
 	order cpubid momid test_pcntl ///
@@ -666,14 +666,17 @@ if decor == 1 {
 		mage  ///
 		mom_grade ///
 		momtest ///
-		spouse_yn /// 
+		spouse_* /// 
 		csex* ///
 		childage ///
 		family_size ///
 		fincome ///
 		test_pcntl
 	
-	** Suffix data 	// Assign conscutive numbers, sim = simultaneous blocks, seq for sequential blocks
+	** Suffix data 	- Assign conscutive numbers, sim = simultaneous blocks, seq for sequential blocks
+	** Note:		- If block 0 covariates are sequential, include only the first in block 0.
+	**				- If block 0 covariates are simultaneous, include all.
+
 	scalar suffix = 1 
 	if suffix == 1{
 		
@@ -701,10 +704,16 @@ if decor == 1 {
 
 	} //End if
 	di "Done with suffix blocks."
-		
-	** Call Extended Laplace: 	ext_laplace depvarname startblockno endblockno intermediateflag 
-	**				example:	extended_laplace test_pcntl 0 4 `save_intermediate' 
-	quietly extended_laplace test_pcntl 0 4 `save_intermediate'  
+	
+	** Name controls and independent variable
+	local controls = "*_s*"
+
+	reg test_pcntl `controls'
+	
+	** Call Extended Laplace: 	ext_laplace depvarname startblockno endblockno intermediateflag // controls
+	**				example:	extended_laplace test_pcntl 0 4 `save_intermediate' // *_s*
+	*quietly 
+	extended_laplace test_pcntl 0 4 `save_intermediate' // "`controls'"
 	
 	** Print and save output
 	esttab, nonumber se r2(a5) compress 

@@ -19,7 +19,7 @@ program define 			extended_laplace
 	local startblock		 	= "`2'"		
 	local endblock				= "`3'"
 	local save_intermediate		= "`4'"		
-	local myfolder				= "`5'"
+	//local controls				= "`5'"
 			
 	** List inputs
 	while "`1'" != "" {
@@ -33,12 +33,13 @@ program define 			extended_laplace
 	****************************************
 	scalar center = 1
 	if center == 1 {
+		
 		** Gen filler vars
 		cap gen _sim 			= 0
 		cap gen _seq			= 0
-		
+	
 		** Set controls
-		local controls *_sim* *_seq*
+		local controls = "*_s*"
 		
 		** Begin loop
 		foreach var of varlist `controls' {
@@ -71,8 +72,8 @@ program define 			extended_laplace
 	if laplace == 1 {
 			
 		** Call Extended Laplace
-		// ext_laplace depvar startblock endblock save_intermediate
-		*ext_laplace test_pcntl 0 4 save_intermediate
+		** ext_laplace depvar startblock endblock save_intermediate //controls
+		** e.g., ext_laplace test_pcntl 0 4 save_intermediate //`controls'
 		
 		** Convert save_intermediate flag to eststo prefix
 		local int_prefix 		= ""
@@ -94,13 +95,13 @@ program define 			extended_laplace
 		** Save terminal regression OLS (direct effects)
 		eststo clear
 		** Reg - OLS linear
-		`comp_prefix' 	reg test_pcntl* year* momrace* mage* mom_grade* momtest* spouse_* ///
-				csex* childage* family_size* fincome* 
+		`comp_prefix' 	reg `depvar' `controls' 
 			
 		** Decorr loop
-		cap rename *_sim0 *_sim0_d
-		cap rename *_seq0 *_seq0_d
-		foreach num of numlist 1/4    {
+		cap rename *_sim`startblock' *_sim`startblock'_d
+		cap rename *_seq`startblock' *_seq`startblock'_d
+		local first = `startblock' + 1
+		foreach num of numlist `first'/`endblock'    {
 
 				di "Starting block `num'."
 
@@ -179,15 +180,14 @@ program define 			extended_laplace
 		
 		** Reg and save final reg for intermediate results set
 		** Store dependent variable reg
-		`int_prefix' 	reg test_pcntl *_d
+		`int_prefix' 	reg `depvar' *_d
 						
 		** Remove decor prefix
 		rename *_d *
 					
 		** Post decor reg for table
 		** Reg decor data - linear
-		`comp_prefix' 	reg test_pcntl year* momrace* mage* mom_grade* momtest* spouse_* ///
-				csex* childage* family_size* fincome* 
+		`comp_prefix' 	reg `depvar' `controls' 
 		
 		** Loop restore names
 		foreach num of numlist 0/20 {
