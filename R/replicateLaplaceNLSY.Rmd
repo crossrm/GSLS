@@ -1,9 +1,14 @@
 ---
-title:  "Replicate results from: Removing Collinearity while Preserving Interpretability"
-author: "Robin Cross"
-date:   "2.4.2022"
-output: "Results tables csv"
----
+Title:    Extended Laplace method and illustration
+Goal: 	  Replicate results in "Removing collinearity while keeping interpretability"
+Inputs:	  User settings (see options below)
+          Data file - Laplace►_NLSY_data.csv
+Outputs:  LaTex format - OLS/Laplace comparison table (2)				
+		      LaTex format - Intermediate regression results table (3)
+		      Orthogonalized data set - decor_data (data frame format)
+Written:  robin m cross, 2.14.19
+Release:  2.16.22 rc
+--- 
 
 Packages and libraries
 ```{r}
@@ -107,12 +112,10 @@ endblock <- 4
 
 ```
 
-Call laplace.R
+Call extended_laplace.R
 ```{r}
 
-source("laplace.R")
-
-asdf
+source("extended_laplace.R")
 
 ```
 
