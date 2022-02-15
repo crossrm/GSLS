@@ -657,7 +657,7 @@ if decor == 1 {
 	** Set results table print choice
 	** Table 2 - (save_intermediate=0) Results table compares OLS direct effects to Laplace total effects
 	** Table 3 - (save_intermediate=1) Intermediate regression results (all) - too large for some screen display
-	local save_intermediate 	= 0
+	local save_intermediate 	= 1
   	
 	** Order data 	// Order chronologically, group simultaneous variables
 	order cpubid momid test_pcntl ///
