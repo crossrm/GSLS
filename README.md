@@ -1,2 +1,2 @@
 # laplace
-Replication code for "Removing collinearity while preserving interpretability" in R and Stata
+Replication code for "Causal Interpretation of Laplace Orthogonalization" in R and Stata
