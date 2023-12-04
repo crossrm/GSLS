@@ -766,12 +766,12 @@ di "Done with margins."
 ***********************************************************
 ** Covariate matching
 ** Goal: 	Matches observations based on Mahalanobis covariate distance to find treatment effect
-** Outputs: Average treatment effect of race and income, 
+** Outputs: Average treatment effect of race and income upon treated (atet), 
 **          covariate means before and after matching, 
 **          standard differences in matched/unmatched covariate means
 ** written: aaron c kratzer, 2.12.19
 ** revised: ACK 			 6.28.19
-** 			RMC				 9.7.21
+** revised: RMC				 9.7.21
 ***********************************************************
 scalar match = 1
 if match == 1 {
@@ -799,14 +799,14 @@ if match == 1 {
 	gen momrace3					= (momrace==3)
 	
 	** Match - income - high income (treatment) vs low income (control)
-	teffects nnmatch (test_pcntl momrace1-family_size) (income), biasadj(momrace1-family_size) generate(matches) 
+	teffects nnmatch (test_pcntl momrace1-family_size) (income), biasadj(momrace1-family_size) generate(matches) atet
 		
 	** Show covariate standard differences after matching
 	tebalance summarize
 	drop matches*
 		
 	** Match - race - white (treatment) vs non-white (control)
-	teffects nnmatch (test_pcntl mage-fincome) (momrace3), biasadj(mage-fincome) generate(matches) 
+	teffects nnmatch (test_pcntl mage-fincome) (momrace3), biasadj(mage-fincome) generate(matches) atet 
 		
 	** Show covariate standard differences after matching
 	tebalance summarize
