@@ -1,2 +1,2 @@
 # laplace
-Replication code for "Causal Interpretation of Laplace Orthogonalization" in R and Stata
+Replication code for "Interpreting and solving multicollinearity via Laplace orthogonalization" in R and Stata
