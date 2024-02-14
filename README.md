@@ -1,5 +1,5 @@
-# laplace
-Replication code for "Interpreting and solving multicollinearity via Laplace orthogonalization" in R and Stata
+# GSLS
+Replication code for "CAUSAL ORTHOGONALIZATION: MULTICOLLINEARITY, ECONOMIC INTERPRETABILITY, AND THE GRAM-SCHMIDT PROCESS" in R and Stata
 
 For Stata
   - Open LaplaceNLSYreplication.do and run (Cntrl+d).
