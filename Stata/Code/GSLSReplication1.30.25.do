@@ -1,15 +1,22 @@
 ***********************************************************
 ***********************************************************
 ** GSLS method illustration
-** Goal: 	Replicate results in "Removing collinearity while keeping interpretability"
+** Goal: 	Replicate results in "Treatment effects without multicolinearity?"
 ** Inputs:	User settings (see options below)
 **			File - Mother characteristics and household income - incomeAFQT.csv
 **			File - Child characteristics and test scores - peabodyPIATreadingcomp.csv
-** Outputs: Summary table (1) 
-**			OLS/GSLS comparison table (2)
-**			Income figure (2)
-**			Intermediate regression results table (3)
-**			Covariate matching results tables (4)-(5)
+**			File - Job training file - nwcps.dta
+** 			File - Inflation adjustment - CPI.dta
+** Outputs: 
+**		Jobs program
+**			Summary table (1) On screen
+**			OLS/GSLS comparison table (2) On screen
+**			Covariate matching and treatment results tables (3) On screen
+** 		NSLY
+**			Summary table (4) On screen
+**			OLS/GSLS comparison table (5) On screen
+**			Intermediate regression results (6) - GSLS_results*.csv
+**			Covariate matching and treatment results tables (7) On screen
 ** Written: robin m cross, 2.12.19
 ** Updated: Matching section 6.29.19 AW
 ** 			GSLS illustration 9.2.21 RC
