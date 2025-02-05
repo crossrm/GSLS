@@ -53,7 +53,7 @@ Load data
 rm(list = ls())
 
 #Load Data
-run_data            <- read.delim('C:/data/laplace/R/Laplace_NLSY_data.csv')
+run_data            <- read.delim('C:/data/GSLS/R/Laplace_NLSY_data.csv')
 
 
 ```
