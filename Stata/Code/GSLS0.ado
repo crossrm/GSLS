@@ -20,8 +20,7 @@ program define 			GSLS0
 	local depvar 				= "`1'"
 	local startblock		 	= "`2'"		
 	local endblock				= "`3'"
-	//local save_intermediate		= "`4'"		
-					
+						
 	** List inputs
 	while "`1'" != "" {
 		
@@ -218,7 +217,7 @@ program define 			GSLS0
 		if save_intermediate == 1 { 
 			
 			esttab, nonumber se r2(a5) compress 
-			cd_results
+			cd_StataResults
 			esttab using GSLS_results_save_intermediate.csv, replace
 						
 		} //End if	

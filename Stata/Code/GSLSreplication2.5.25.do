@@ -1,13 +1,22 @@
 ***********************************************************
 ***********************************************************
 ** GSLS method illustration
-** Goal: 	Replicate results in "Treatment effects without multicollinearity."
+** Goal: 	Replicate results in "Treatment effects without multicolinearity?"
 ** Inputs:	User settings (see options below)
-** Outputs: Summary table (1) 
-**			OLS/GSLS comparison table (2)
-**			Income figure (2)
-**			Intermediate regression results table (3)
-**			Covariate matching results tables (4)-(5)
+**			File - Mother characteristics and household income - incomeAFQT.csv
+**			File - Child characteristics and test scores - peabodyPIATreadingcomp.csv
+**			File - Job training file - nwcps.dta
+** 			File - Inflation adjustment - CPI.dta
+** Outputs: 
+**		Jobs program
+**			Summary table (1) On screen
+**			OLS/GSLS comparison table (2) On screen
+**			Covariate matching and treatment results tables (3) On screen
+** 		NSLY
+**			Summary table (4) On screen
+**			OLS/GSLS comparison table (5) On screen
+**			Intermediate regression results (6) - GSLS_results*.csv
+**			Covariate matching and treatment results tables (7) On screen
 ** Written: robin m cross, 2.12.19
 ** Updated: Matching section 6.29.19 AW
 ** 			GSLS illustration 9.2.21 RC
@@ -35,8 +44,8 @@ if prep == 1 {
 		
 		** Margins plot option 1 -- color
 		ssc install g538schemes, replace all
-			*help 538
-			
+		ssc install hettreatreg, all
+		
 		** Margins plot option 2 -- article
 		scalar article_format = 1
 		if article_format == 1 {
@@ -475,11 +484,6 @@ if prep == 1 {
 		} //End loop
 		di "Done with data creation loop."
 		
-		** Erase
-		cd_StataStage
-		//erase tests_NLSY.dta
-		//erase merged_NLSY.dta
-		
 		** Keep first test record - duplicates drop keeps first, so order reverse chron.
 		gen n						= _n
 		gsort -n
@@ -523,10 +527,6 @@ if prep == 1 {
 		replace fincome			= fincome * index
 		drop cpi base2020 index
 		
-		** Erase
-		cd_StataStage
-		//erase CPI_index.dta		
-		
 		** Save
 		cd_StataStage
 		save prep_data_NLSY, replace
@@ -545,11 +545,7 @@ if prep == 1 {
 		** Load
 		cd_StataStage
 		use prep_data_NLSY, clear 
-		
-		** Erase
-		cd_StataStage
-		*erase prep_data_NLSY.dta
-		
+				
 		** Set income preference (log income = 1)
 		scalar ln = 1
 		
@@ -613,16 +609,12 @@ if prep == 1 {
 		drop crace*		//perfectly collinear with momrace - NLSY did not distinguish
 		
 		 ** Order
-		 order test_pcntl year* momrace* mage mom_grade momtest spouse_* ///
+		 order test_pcntl momrace* year* mage mom_grade momtest spouse_* ///
 			csex* childage family_size fincome
 			 
 		** Save Stata file
 		cd_StataStage
 		save run_data_NLSY, replace
-		
-		** Output csv file
-		cd_StataStage
-		outsheet using GSLS_NLSY_data.csv, replace
 		
 	} //End if 
 	di "Done with data prep."
@@ -653,13 +645,13 @@ if cause == 1 {
 	** Keep
 	order cpubid momid ///
 		nonwhite ///
+		year* ///
 		mage  ///
 		mom_grade ///
 		momtest ///
+		spouse_* /// 
 		csex* ///
 		childage ///
-		year* ///
-		spouse_* /// 
 		family_size ///
 		hincome ///
 		test_pcntl
@@ -669,12 +661,16 @@ if cause == 1 {
 	** Save
 	cd_StataStage
 	save GSLS_ready, replace
+		
+	** Output csv file
+	cd_R
+	outsheet using GSLS_NLSY_data.csv, replace
 	
 } //end if
 di "Done with causal OLS."
 
 ***********************************************************
-** Extended GSLS
+** GSLS
 ***********************************************************
 scalar decor = 1
 if decor == 1 {
@@ -686,13 +682,13 @@ if decor == 1 {
 	** Order data 	// Order chronologically, group simultaneous variables
 	order cpubid momid ///
 		nonwhite ///
+		year* ///
 		mage  ///
 		mom_grade ///
 		momtest ///
+		spouse_* /// 
 		csex* ///
 		childage ///
-		year* ///
-		spouse_* /// 
 		family_size ///
 		hincome ///
 		test_pcntl
@@ -741,9 +737,9 @@ if decor == 1 {
 	** Set results table print choice
 	** Table 2 - (save_intermediate=0) Results table compares OLS direct effects to GSLS total effects
 	** Table 3 - (save_intermediate=1) Intermediate regression results (all) - too large for some screen display
-	scalar save_intermediate 	= 1
+	scalar save_intermediate 	= 0
   	
-	** Call Extended GSLS: 		GSLS0 	depvarname startblockno endblockno 
+	** Call GSLS: 		GSLS0 	depvarname startblockno endblockno 
 	**				example:	GSLS0  	test_pcntl 0 			4 
 	*quietly 
 	GSLS0 test_pcntl 0 4 
@@ -826,8 +822,7 @@ if match == 1 {
 	reg test_pcntl nonwhite-family_size hincome
 	hettreatreg mage-hincome, o(test_pcntl) t(nonwhite) 
 	bootstrap att = e(att) atu = e(atu) ate = e(ate), reps(300) seed(1101): hettreatreg mage-hincome, o(test_pcntl) t(nonwhite) 
-		
-	
+			
 	** Match - race - white (treatment) vs non-white (control)
 	*ATET
 	teffects nnmatch (test_pcntl mage-hincome) (nonwhite), biasadj(mage-hincome) generate(matches) atet 
@@ -850,9 +845,6 @@ di "Done with matching."
 ***********************************************************
 local angrist = 1
 if `angrist' == 1 {
-	
-	** Install
-	*ssc install hettreatreg, all
 	
 	** process
 	cd_StataData
@@ -924,7 +916,7 @@ if `angrist' == 1 {
 	**	 example:	GSLS0 test_pcntl 0 				4 
 	*quietly 
 		di "Calling GSLS: depvar startblock `endblock' `save_intermediate'." 
-	GSLS0 re78 0 `endblock'  
+	GSLS0 re78 0 `endblock' `save_intermediate' 
 	
 	** Save for display 
 	eststo: reg re78 black-job, vce(robust)
