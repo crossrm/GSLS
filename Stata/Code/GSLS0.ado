@@ -1,6 +1,6 @@
 ***********************************************************
 ***********************************************************
-** Extended Laplace program
+** GSLS program
 ** Goal: 	Replicate results in "Treatment effects without multicollinearity."
 ** Outputs: OLS/GSLS comparison table
 **					-or-
@@ -88,14 +88,14 @@ program define 			GSLS0
 	di "Done with center and drop."
 	
 	****************************************
-	** Start Extended Laplace and save results
+	** Start GSLS and save results
 	****************************************
-	scalar laplace = 1
-	if laplace == 1 {
+	scalar GSLS = 1
+	if GSLS == 1 {
 			
-		** Call Extended Laplace
-		** ext_laplace depvar startblock endblock save_intermediate //controls
-		** e.g., ext_laplace test_pcntl 0 4 save_intermediate //`controls'
+		** Call GSLS
+		** GSLS depvar startblock endblock save_intermediate //controls
+		** e.g., GSLS test_pcntl 0 4 save_intermediate //`controls'
 		
 		** Convert save_intermediate flag to eststo prefix
 		local int_prefix 		= ""
@@ -218,8 +218,8 @@ program define 			GSLS0
 		if save_intermediate == 1 { 
 			
 			esttab, nonumber se r2(a5) compress 
-			cd_wine
-			esttab using laplace_results_save_intermediate.csv, replace
+			cd_results
+			esttab using GSLS_results_save_intermediate.csv, replace
 						
 		} //End if	
 		di "Done with set eststo prefix."
@@ -228,7 +228,7 @@ program define 			GSLS0
 		*drop ones
 		
 	*} //End if
-	di "Done with Extended Laplace."
+	di "Done with GSLS."
 	
 end
 di "Program end."

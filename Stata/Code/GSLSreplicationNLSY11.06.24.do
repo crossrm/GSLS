@@ -1,22 +1,13 @@
 ***********************************************************
 ***********************************************************
 ** GSLS method illustration
-** Goal: 	Replicate results in "Treatment effects without multicolinearity?"
+** Goal: 	Replicate results in "Treatment effects without multicollinearity."
 ** Inputs:	User settings (see options below)
-**			File - Mother characteristics and household income - incomeAFQT.csv
-**			File - Child characteristics and test scores - peabodyPIATreadingcomp.csv
-**			File - Job training file - nwcps.dta
-** 			File - Inflation adjustment - CPI.dta
-** Outputs: 
-**		Jobs program
-**			Summary table (1) On screen
-**			OLS/GSLS comparison table (2) On screen
-**			Covariate matching and treatment results tables (3) On screen
-** 		NSLY
-**			Summary table (4) On screen
-**			OLS/GSLS comparison table (5) On screen
-**			Intermediate regression results (6) - GSLS_results*.csv
-**			Covariate matching and treatment results tables (7) On screen
+** Outputs: Summary table (1) 
+**			OLS/GSLS comparison table (2)
+**			Income figure (2)
+**			Intermediate regression results table (3)
+**			Covariate matching results tables (4)-(5)
 ** Written: robin m cross, 2.12.19
 ** Updated: Matching section 6.29.19 AW
 ** 			GSLS illustration 9.2.21 RC
@@ -68,8 +59,6 @@ if prep == 1 {
 	if set == 1 {
 		
 		clear all
-		*local myfolder = "C:\data\GSLS\stata\" //Set your default drive here
-		*cd `mydrive'
 		clear matrix
 		set matsize 11000, permanently
 		set maxvar 32767, permanently
@@ -631,10 +620,6 @@ if prep == 1 {
 		cd_StataStage
 		save run_data_NLSY, replace
 		
-		** Output csv file
-		cd_StataStage
-		outsheet using GSLS_NLSY_data.csv, replace
-		
 	} //End if 
 	di "Done with data prep."
 	
@@ -680,6 +665,12 @@ if cause == 1 {
 	** Save
 	cd_StataStage
 	save GSLS_ready, replace
+	
+	** Output csv file
+	cd_R
+	outsheet using GSLS_NLSY_data.csv, replace
+	insheet using GSLS_NLSY_data.csv,clear
+		
 	
 } //end if
 di "Done with causal OLS."
@@ -752,7 +743,7 @@ if decor == 1 {
 	** Set results table print choice
 	** Table 2 - (save_intermediate=0) Results table compares OLS direct effects to GSLS total effects
 	** Table 3 - (save_intermediate=1) Intermediate regression results (all) - too large for some screen display
-	scalar save_intermediate 	= 1
+	scalar save_intermediate 	= 0
   	
 	** Call Extended GSLS: 		GSLS0 	depvarname startblockno endblockno 
 	**				example:	GSLS0  	test_pcntl 0 			4 

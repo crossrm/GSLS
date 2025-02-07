@@ -1,12 +1,11 @@
 # ---
-# Title:    Extended Laplace program
-# Goal: 	  Perform Extended Laplace regression as shown in "Removing collinearity while keeping interpretability"
-# Inputs:	  locals (described below)
-# Outputs:  Results list - OLS/Laplace comparison table (2)				
-#			      Results list - Intermediate regression results table (3)
+# Title:    GSLS method
+# Goal: 	  Replicate results in "Treatment effects without multicollinearity?"# Inputs:	  locals (described below)
+# Outputs:  Results list - OLS/GSLS comparison table (5)				
+#			      Results list - Intermediate regression results table (6)
 #           Orthogonalized covariate set - decor_data (list format)          
 # Written:  robin m cross, 2.14.19
-# Release:  2.16.22 RC
+# Release:  2.7.25 RC
 # ---
 
 # Center - all variables - creates a matrix
@@ -39,7 +38,7 @@ b <- 1
 k <- 1
 save_count <- 1
 
-# Ext. Laplace loop
+# GSLS loop
 for (i in nlist) {
   
   ## List covariates in block
@@ -130,9 +129,9 @@ for (i in nlist) {
   # Advance block counter
   b <- b + 1
   
-} #End Laplace loop
+} #End GSLS loop
 
-# Terminal comparison model - OLS direct vs Laplace total effects
+# Terminal comparison model - OLS direct vs GSLS total effects
 model <- lm(run_data$dep_var ~ ., data=decor_data)
 int_list[[save_count]] <- model
 comp_list[[2]] <- model
